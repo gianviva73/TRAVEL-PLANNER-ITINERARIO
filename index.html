@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planner & Itinerario - Digital Creator Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            500: '#0f172a',
+                            600: '#020617',
+                            accent: '#2563eb'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .light-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+        .light-card-accent {
+            background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%);
+            border: 1px solid #cbd5e1;
+        }
+        input, select, textarea {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #2563eb !important;
+            outline: none !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+    <!-- Header / Navbar (Tema Chiaro) -->
+    <header class="border-b border-slate-200 bg-white/90 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    🗺️
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-slate-900 leading-tight">Travel Planner & Itinerario</h1>
+                    <p class="text-xs text-blue-600 font-semibold">Digital Creator Lab</p>
+                </div>
+            </div>
+            
+            <button id="guideBtn" type="button" onclick="toggleGuide(event)" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-all border border-slate-300 cursor-pointer">
+                <span>❓ Guida Utente</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 pt-6 flex-grow w-full space-y-6">
+
+        <!-- Banner Guida Utente -->
+        <section id="userGuide" class="hidden light-card rounded-2xl p-5 border-blue-200 transition-all duration-300 shadow-lg">
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-2 font-bold text-slate-900">
+                    <span>🧭</span>
+                    <h2 class="text-base">Come funziona il Planner?</h2>
+                </div>
+                <button type="button" onclick="hideGuide()" class="text-slate-500 hover:text-slate-900 text-sm px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-all">
+                    ✖
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-blue-600 mb-1">1. Organizza le Tappe</div>
+                    <p>Aggiungi le attività giorno per giorno indicando orari e luoghi da visitare.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-amber-600 mb-1">2. Usa i Semafori di Stato</div>
+                    <p>Assegna il pallino Verde (Confermato), Arancione (In bilico) o Rosso (Problema/Annullato) a ogni attività.</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-semibold text-emerald-600 mb-1">3. Salvataggio Locale</div>
+                    <p>Tutto il tuo itinerario resta salvato in automatico nel browser del tuo smartphone.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD RIEPILOGO STATO -->
+        <section class="light-card-accent rounded-2xl p-5 md:p-6 shadow-md">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                        📊 Stato delle Attività di Viaggio
+                    </h2>
+                    <p id="statsText" class="text-sm font-medium text-slate-600 mt-1">Caricamento statistiche...</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs font-semibold">
+                    <span class="flex items-center gap-1 text-emerald-700"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Confermato</span>
+                    <span class="flex items-center gap-1 text-amber-700"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Da Verificare</span>
+                    <span class="flex items-center gap-1 text-rose-700"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Critico/Annullato</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- AGGIUNTA NUOVA TAPPA / ATTIVITÀ -->
+        <section class="light-card rounded-2xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                ➕ Aggiungi Tappa o Attività all'Itinerario
+            </h3>
+            <form onsubmit="addActivity(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Giorno / Data</label>
+                    <input type="text" id="inputDay" placeholder="Es. Giorno 1 - 15 Agosto" required class="w-full text-xs rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Orario & Attività</label>
+                    <input type="text" id="inputTitle" placeholder="Es. Visita Museo / Volo" required class="w-full text-xs rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Stato (Semaforo)</label>
+                    <select id="inputStatus" class="w-full text-xs rounded-xl p-2">
+                        <option value="green">🟢 Confermato / Pronto</option>
+                        <option value="orange">🟠 Da Verificare / In sospeso</option>
+                        <option value="red">🔴 Problema / Annullato</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-all shadow-md">
+                        Aggiungi all'Itinerario
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- LISTA ITINERARIO PER GIORNI -->
+        <div id="itineraryContainer" class="space-y-4">
+            <!-- Renderizzato via JS -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-slate-200 pt-6 text-center text-xs text-slate-500 bg-white">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 pb-4">
+            <p>© 2026 <span class="text-slate-800 font-semibold">Digital Creator Lab</span>. Tutti i diritti riservati.</p>
+            <div class="flex items-center gap-2 text-slate-600">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Web App Gratuita & Pronto Uso</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        var defaultItinerary = [
+            {
+                day: "Giorno 1 - Arrivo & Check-in",
+                activities: [
+                    { id: 1, title: "Volo di arrivo in aeroporto (Ore 10:30)", status: "green" },
+                    { id: 2, title: "Transfer in hotel e consegna camere", status: "green" },
+                    { id: 3, title: "Cena tipica nel centro storico", status: "orange" }
+                ]
+            },
+            {
+                day: "Giorno 2 - Esplorazione & Cultura",
+                activities: [
+                    { id: 4, title: "Visita guidata al museo principale", status: "orange" },
+                    { id: 5, title: "Pranzo panoramico prenotato", status: "green" },
+                    { id: 6, title: "Tour pomeridiano a piedi", status: "red" }
+                ]
+            }
+        ];
+
+        var itineraryData = [];
+
+        function initPlanner() {
+            var saved = localStorage.getItem('dcl_travel_planner');
+            if (saved) {
+                itineraryData = JSON.parse(saved);
+            } else {
+                itineraryData = JSON.parse(JSON.stringify(defaultItinerary));
+            }
+        }
+
+        function savePlanner() {
+            localStorage.setItem('dcl_travel_planner', JSON.stringify(itineraryData));
+        }
+
+        function toggleGuide(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            var guide = document.getElementById('userGuide');
+            if (guide) guide.classList.toggle('hidden');
+        }
+
+        function hideGuide() {
+            var guide = document.getElementById('userGuide');
+            if (guide) guide.classList.add('hidden');
+        }
+
+        function renderPlanner() {
+            var container = document.getElementById('itineraryContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            var totalActs = 0;
+            var greenCount = 0;
+            var orangeCount = 0;
+            var redCount = 0;
+
+            itineraryData.forEach(function(dayGroup, dayIdx) {
+                var card = document.createElement('section');
+                card.className = "light-card rounded-2xl p-5 shadow-sm";
+
+                var headerDiv = document.createElement('div');
+                headerDiv.className = "flex items-center justify-between mb-3 border-b border-slate-100 pb-2";
+                
+                var dayTitle = document.createElement('h3');
+                dayTitle.className = "text-sm font-bold uppercase tracking-wider text-blue-700";
+                dayTitle.innerText = dayGroup.day;
+
+                var delDayBtn = document.createElement('button');
+                delDayBtn.type = "button";
+                delDayBtn.className = "text-xs text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 transition-all";
+                delDayBtn.innerText = "Elimina Giorno";
+                delDayBtn.onclick = function() { deleteDay(dayIdx); };
+
+                headerDiv.appendChild(dayTitle);
+                headerDiv.appendChild(delDayBtn);
+                card.appendChild(headerDiv);
+
+                var actList = document.createElement('div');
+                actList.className = "space-y-2";
+
+                dayGroup.activities.forEach(function(act, actIdx) {
+                    totalActs++;
+                    if (act.status === 'green') greenCount++;
+                    if (act.status === 'orange') orangeCount++;
+                    if (act.status === 'red') redCount++;
+
+                    var dotColor = act.status === 'green' ? 'bg-emerald-500' : (act.status === 'orange' ? 'bg-amber-500' : 'bg-rose-500');
+
+                    var row = document.createElement('div');
+                    row.className = "flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200 hover:border-slate-300 transition-all";
+                    
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3 w-full">
+                            <span class="w-3.5 h-3.5 rounded-full ${dotColor} shrink-0 shadow-sm" title="Stato: ${act.status}"></span>
+                            <span class="text-xs sm:text-sm font-medium text-slate-800">${act.title}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <select onchange="updateStatus(${dayIdx}, ${actIdx}, this.value)" class="text-[11px] rounded-lg p-1 font-semibold">
+                                <option value="green" ${act.status === 'green' ? 'selected' : ''}>🟢 OK</option>
+                                <option value="orange" ${act.status === 'orange' ? 'selected' : ''}>🟠 Sospeso</option>
+                                <option value="red" ${act.status === 'red' ? 'selected' : ''}>🔴 Problema</option>
+                            </select>
+                            <button type="button" onclick="deleteActivity(${dayIdx}, ${actIdx})" class="text-slate-400 hover:text-rose-600 px-1.5 py-1 text-xs">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+                    actList.appendChild(row);
+                });
+
+                card.appendChild(actList);
+                container.appendChild(card);
+            });
+
+            // Aggiorna statistiche in alto
+            document.getElementById('statsText').innerText = totalActs + " attività totali — 🟢 " + greenCount + " confermate, 🟠 " + orangeCount + " da verificare, 🔴 " + redCount + " critiche";
+        }
+
+        function addActivity(e) {
+            e.preventDefault();
+            var dayInput = document.getElementById('inputDay').value.trim();
+            var titleInput = document.getElementById('inputTitle').value.trim();
+            var statusInput = document.getElementById('inputStatus').value;
+
+            if (!dayInput || !titleInput) return;
+
+            var existingDay = itineraryData.find(function(d) { return d.day.toLowerCase() === dayInput.toLowerCase(); });
+
+            var newId = Date.now();
+            if (existingDay) {
+                existingDay.activities.push({ id: newId, title: titleInput, status: statusInput });
+            } else {
+                itineraryData.push({
+                    day: dayInput,
+                    activities: [{ id: newId, title: titleInput, status: statusInput }]
+                });
+            }
+
+            document.getElementById('inputTitle').value = '';
+            savePlanner();
+            renderPlanner();
+        }
+
+        function updateStatus(dayIdx, actIdx, newStatus) {
+            itineraryData[dayIdx].activities[actIdx].status = newStatus;
+            savePlanner();
+            renderPlanner();
+        }
+
+        function deleteActivity(dayIdx, actIdx) {
+            itineraryData[dayIdx].activities.splice(actIdx, 1);
+            if (itineraryData[dayIdx].activities.length === 0) {
+                itineraryData.splice(dayIdx, 1);
+            }
+            savePlanner();
+            renderPlanner();
+        }
+
+        function deleteDay(dayIdx) {
+            itineraryData.splice(dayIdx, 1);
+            savePlanner();
+            renderPlanner();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initPlanner();
+            renderPlanner();
+
+            document.addEventListener('click', function(e) {
+                var guide = document.getElementById('userGuide');
+                var btn = document.getElementById('guideBtn');
+                if (guide && !guide.classList.contains('hidden') && !guide.contains(e.target) && !btn.contains(e.target)) {
+                    guide.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
